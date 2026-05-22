@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      :root {
+        --color-principal: #252c54;
+        --color-principal-hover: #1a1f3a;
+        --color-borde: #5f5f5f;
+        --color-header: #efefef;
+        --color-total: #f7f7f7;
+        --color-success: #3eb807;
+        --color-error: #cc0000;
+        --color-acento: #e60380;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #ffffff;
+        color: #111;
+      }
+
+      .topbar {
+        background-color: var(--color-principal);
+        padding: 10px;
+        text-align: center;
+      }
+
+      .topbar img { height: 60px; }
+
+      .contenedor {
+        max-width: 1450px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .titulo-seccion {
+        color: var(--color-acento);
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .titulo-principal {
+        text-align: center;
+        color: #000;
+        font-size: 28px;
+        margin-bottom: 6px;
+      }
+
+      .subtitulo-principal {
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 24px;
+      }
+
+      .texto-intro {
+        margin-bottom: 20px;
+        line-height: 1.45;
+      }
+
+      .acciones-superiores {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+
+      .bloque-form {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 18px;
+      }
+
+      .form-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+        position: relative;
+      }
+
+      .form-row label {
+        width: 230px;
+        min-width: 230px;
+        font-weight: bold;
+        padding-top: 8px;
+      }
+
+      .form-row input,
+      .form-row select,
+      .form-row textarea {
+        flex: 1;
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 14px;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+      }
+
+      .campo-organizacion { position: relative; flex: 1; }
+
+      #sugerencias {
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        max-height: 220px;
+        overflow-y: auto;
+        display: none;
+        position: absolute;
+        top: 42px;
+        left: 0;
+        right: 0;
+        background: white;
+        z-index: 999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      }
+
+      #sugerencias div { padding: 8px 10px; cursor: pointer; }
+      #sugerencias div:hover { background-color: #f0f0f0; }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+
+      th, td {
+        border: 1px solid var(--color-borde);
+        padding: 10px 8px;
+        vertical-align: top;
+      }
+
+      th {
+        background-color: var(--color-header);
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .col-dimension { width: 18%; }
+      .col-subdimension { width: 18%; }
+      .col-maximo { width: 9%; text-align: center; font-weight: bold; }
+      .col-obtenido { width: 12%; text-align: center; }
+      .col-criterio { width: 43%; }
+
+      .celda-dimension {
+        text-align: center;
+        font-weight: bold;
+        vertical-align: middle;
+        line-height: 1.5;
+      }
+
+      .celda-subdimension { vertical-align: middle; }
+      .criterio-linea { margin-bottom: 8px; line-height: 1.4; }
+      .criterio-linea:last-child { margin-bottom: 0; }
+
+      .select-puntaje {
+        width: 100%;
+        min-width: 90px;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .total-row td {
+        background: var(--color-total);
+        font-weight: bold;
+        vertical-align: middle;
+      }
+
+      .total-puntaje {
+        width: 90px;
+        text-align: center;
+        font-weight: bold;
+        padding: 8px;
+        border: 1px solid #999;
+        border-radius: 6px;
+      }
+
+      .boton {
+        background-color: var(--color-principal);
+        color: white;
+        padding: 12px 22px;
+        font-size: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .boton:hover { background-color: var(--color-principal-hover); }
+      .boton:disabled { opacity: 0.7; cursor: not-allowed; }
+      .centrado { text-align: center; }
+
+      .aviso {
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 8px;
+        margin: 10px auto 20px auto;
+        max-width: 700px;
+      }
+
+      .modal-fondo {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0,0,0,0.45);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal-contenido {
+        background: white;
+        padding: 28px;
+        border-radius: 10px;
+        max-width: 430px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      }
+
+      .modal-contenido h3 { margin-bottom: 10px; }
+      .modal-exito h3 { color: var(--color-success); }
+      .modal-error h3 { color: var(--color-error); }
+      .modal-envio h3 { color: var(--color-principal); }
+
+      .spinner-grande {
+        width: 42px;
+        height: 42px;
+        border: 4px solid #e0e0e0;
+        border-top-color: var(--color-acento);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 16px auto;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      @media (max-width: 900px) {
+        .form-row { flex-direction: column; }
+        .form-row label { width: 100%; min-width: 100%; padding-top: 0; }
+        table { font-size: 13px; }
+        .acciones-superiores { justify-content: center; }
+        .select-puntaje { min-width: unset; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <img src="https://www.municipalidadmaipu.cl/img/escudo_maipu.32d4bc5a.png" alt="Logo Maipú">
+    </div>
+
+    <div class="contenedor">
+      <div id="aviso-plazo" class="aviso"></div>
+
+      <div class="titulo-seccion">10.8. &nbsp;&nbsp;&nbsp; RÚBRICA DE EVALUACIÓN</div>
+      <div class="titulo-principal">PAUTA DE EVALUACIÓN</div>
+      <div class="subtitulo-principal">(ANEXO N°8)</div>
+
+      <p class="texto-intro">
+        La presente pauta de evaluación considera tres dimensiones que suman 100 puntos de calificación máxima.
+        La escala de puntuación considera los siguientes criterios:
+      </p>
+
+      <div class="acciones-superiores">
+        <a href="https://media.municipalidadmaipu.cl/media/documentos/2026/3/17730592233507.pdf" target="_blank">
+          <button type="button" class="boton">Bases TBMS</button>
+        </a>
+        <a href="" target="_blank">
+          <button type="button" class="boton">Proyectos</button>
+        </a>
+      </div>
+
+      <form id="formulario" onsubmit="enviarFormulario(); return false;">
+        <div class="bloque-form">
+          <div class="form-row">
+            <label for="evaluador">Nombre evaluador/a:</label>
+            <input type="text" id="evaluador">
+          </div>
+
+          <div class="form-row">
+            <label for="direccion">Unidad Técnica Evaluador/a:</label>
+            <select id="direccion">
+              <option value="">-- Seleccione --</option>
+              <option value="CE DIPRESEC">Comisión Evaluadora DIPRESEC</option>
+              <option value="TRÁNSITO">Dirección de Tránsito</option>
+              <option value="OPERACIONES">Dirección de Operaciones</option>
+              <option value="CONCEJALÍA">Concejalía</option>
+              <option value="UT ALARMAS">Unidad de Alarmas</option>
+              <option value="UT CÁMARAS">Unidad de Cámaras</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="barrio">Barrio:</label>
+            <select id="barrio" onchange="filtrarOrganizaciones()"></select>
+          </div>
+
+          <div class="form-row">
+            <label for="tipologia">Tipología:</label>
+            <select id="tipologia" onchange="onTipologiaChange()"></select>
+          </div>
+
+          <div class="form-row">
+            <label for="organizacion">Nombre organización:</label>
+            <div class="campo-organizacion">
+              <input type="text" id="organizacion" oninput="filtrarOrganizaciones()" autocomplete="off">
+              <div id="sugerencias"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="rut">RUT organización:</label>
+            <input type="text" id="rut" readonly>
+          </div>
+        </div>
+
+        <div class="bloque-form">
+          <table>
+            <tr>
+              <th class="col-dimension">DIMENSIÓN EVALUADA</th>
+              <th class="col-subdimension">SUB-DIMENSIÓN</th>
+              <th class="col-maximo">PUNTAJE MÁXIMO</th>
+              <th class="col-obtenido">PUNTAJE OBTENIDO</th>
+              <th class="col-criterio">CRITERIO</th>
+            </tr>
+
+            <tr>
+              <td rowspan="3" class="celda-dimension">Pertinencia técnica de la propuesta<br><br>Total: 50 ptos.</td>
+              <td class="celda-subdimension">Identificación del problema</td>
+              <td class="col-maximo">15</td>
+              <td class="col-obtenido">
+                <select id="problema" class="select-puntaje" onchange="calcularPuntaje()">
+                  <option value="">-- Seleccione --</option><option value="15">15</option><option value="10">10</option><option value="1">1</option>
+                </select>
+              </td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>15:</strong> Organización identifica claramente un problema de seguridad que puede ser abordado con las tipologías definidas en las bases.</div>
+                <div class="criterio-linea"><strong>10:</strong> Organización identifica parcialmente un problema de seguridad y/o no puede abordarse con las tipologías definidas en las bases.</div>
+                <div class="criterio-linea"><strong>1:</strong> Organización NO identifica un problema de seguridad.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="celda-subdimension">Definición de objetivo y propuesta solución</td>
+              <td class="col-maximo">15</td>
+              <td class="col-obtenido"><select id="objetivo" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="15">15</option><option value="10">10</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>15:</strong> El objetivo planteado es coherente con el problema de seguridad descrito.</div>
+                <div class="criterio-linea"><strong>10:</strong> El objetivo planteado es parcialmente coherente con el problema de seguridad descrito.</div>
+                <div class="criterio-linea"><strong>1:</strong> El objetivo planteado no es coherente con el problema de seguridad descrito.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="celda-subdimension">Formulación propuesta solución</td>
+              <td class="col-maximo">20</td>
+              <td class="col-obtenido"><select id="propuesta" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="20">20</option><option value="10">10</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>20:</strong> Propuesta responde al objetivo definido y resuelve eficientemente el problema identificado.</div>
+                <div class="criterio-linea"><strong>10:</strong> Propuesta responde parcialmente al objetivo definido y/o al problema identificado.</div>
+                <div class="criterio-linea"><strong>1:</strong> Propuesta NO responde al objetivo definido ni al problema identificado.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td rowspan="2" class="celda-dimension">Dimensión social de la iniciativa<br><br>Total: 20 ptos.</td>
+              <td class="celda-subdimension">Fortalecimiento Comunitario</td>
+              <td class="col-maximo">10</td>
+              <td class="col-obtenido"><select id="fortalecimiento" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="10">10</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>10:</strong> Propuesta contempla mecanismos de fortalecimiento comunitario.</div>
+                <div class="criterio-linea"><strong>1:</strong> Propuesta no contempla mecanismos de fortalecimiento comunitario.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="celda-subdimension">Difusión</td>
+              <td class="col-maximo">10</td>
+              <td class="col-obtenido"><select id="difusion" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="10">10</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>10:</strong> Propuesta contempla actividades de difusión.</div>
+                <div class="criterio-linea"><strong>1:</strong> Propuesta no contempla actividades de difusión.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td rowspan="3" class="celda-dimension">Coherencia económica del proyecto<br><br>Total: 30 ptos.</td>
+              <td class="celda-subdimension">Programación</td>
+              <td class="col-maximo">10</td>
+              <td class="col-obtenido"><select id="programacion" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="10">10</option><option value="5">5</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>10:</strong> Actividades en carta gantt son coherentes con la propuesta.</div>
+                <div class="criterio-linea"><strong>5:</strong> Actividades se adecuan parcialmente a la propuesta.</div>
+                <div class="criterio-linea"><strong>1:</strong> Actividades NO se relacionan con la propuesta.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="celda-subdimension">Presupuesto</td>
+              <td class="col-maximo">10</td>
+              <td class="col-obtenido"><select id="presupuesto" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="10">10</option><option value="5">5</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>10:</strong> Presupuesto se ajusta eficientemente a la propuesta.</div>
+                <div class="criterio-linea"><strong>5:</strong> Presupuesto se ajusta parcialmente a la propuesta.</div>
+                <div class="criterio-linea"><strong>1:</strong> Presupuesto no se ajusta a la propuesta.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="celda-subdimension">Aportes adicionales</td>
+              <td class="col-maximo">10</td>
+              <td class="col-obtenido"><select id="aportes" class="select-puntaje" onchange="calcularPuntaje()"><option value="">-- Seleccione --</option><option value="10">10</option><option value="1">1</option></select></td>
+              <td class="col-criterio">
+                <div class="criterio-linea"><strong>10:</strong> Propuesta contempla aportes propios y/o de terceros.</div>
+                <div class="criterio-linea"><strong>1:</strong> Propuesta no contempla aportes propios ni de terceros.</div>
+              </td>
+            </tr>
+
+            <tr class="total-row">
+              <td colspan="2" class="centrado">TOTAL</td>
+              <td class="centrado">100</td>
+              <td class="centrado"><input type="number" id="puntajeFinal" class="total-puntaje" readonly></td>
+              <td></td>
+            </tr>
+          </table>
+
+          <input type="hidden" id="utAsignada">
+          <input type="hidden" id="concejaliaAsignada">
+        </div>
+
+        <div class="bloque-form">
+          <div class="form-row">
+            <label for="observaciones">Observaciones (opcional):</label>
+            <textarea id="observaciones" rows="4"></textarea>
+          </div>
+
+          <div class="centrado">
+            <button type="submit" id="btnEnviar" class="boton">Enviar Evaluación</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="modalEnviando" class="modal-fondo">
+      <div class="modal-contenido modal-envio">
+        <div class="spinner-grande"></div>
+        <h3>Enviando evaluación...</h3>
+        <p>Por favor, no cierres esta ventana ni presiones nuevamente el botón.</p>
+      </div>
+    </div>
+
+    <div id="modalExito" class="modal-fondo">
+      <div class="modal-contenido modal-exito">
+        <h3>✔ Formulario enviado correctamente</h3>
+        <p>La evaluación fue registrada exitosamente.</p>
+        <button type="button" class="boton" onclick="cerrarModal('modalExito')">Aceptar</button>
+      </div>
+    </div>
+
+    <div id="modalError" class="modal-fondo">
+      <div class="modal-contenido modal-error">
+        <h3>❌ Error</h3>
+        <p id="mensajeError">Ocurrió un problema al enviar el formulario.</p>
+        <button type="button" class="boton" onclick="cerrarModal('modalError')">Cerrar</button>
+      </div>
+    </div>
+
+    <script>
+      let organizaciones = [];
+      let enviando = false;
+
+      function poblarSelect(select, valores) {
+        select.innerHTML = '<option value="">-- Todas --</option>';
+        valores.filter(v => v).sort((a, b) => a.localeCompare(b, 'es')).forEach(v => {
+          const op = document.createElement("option");
+          op.value = v;
+          op.textContent = v;
+          select.appendChild(op);
+        });
+      }
+
+      function cargarDatosIniciales() {
+        google.script.run
+          .withSuccessHandler(function(data) {
+            organizaciones = data || [];
+            const barrios = [...new Set(organizaciones.map(o => o.barrio).filter(Boolean))];
+            const tipologias = [...new Set(organizaciones.map(o => o.tipologia).filter(Boolean))];
+            poblarSelect(document.getElementById("barrio"), barrios);
+            poblarSelect(document.getElementById("tipologia"), tipologias);
+          })
+          .withFailureHandler(function(error) {
+            mostrarError(error && error.message ? error.message : 'No se pudieron cargar las organizaciones.');
+          })
+          .obtenerOrganizaciones();
+      }
+
+      function cargarPreferenciasUsuario() {
+        google.script.run
+          .withSuccessHandler(function(data) {
+            if (data && data.evaluador) document.getElementById("evaluador").value = data.evaluador;
+            if (data && data.direccion) document.getElementById("direccion").value = data.direccion;
+          })
+          .obtenerPreferenciasUsuario();
+      }
+
+      function filtrarOrganizaciones() {
+        const input = document.getElementById("organizacion");
+        const barrioSelect = document.getElementById("barrio");
+        const tipologiaSelect = document.getElementById("tipologia");
+        const sugerenciasDiv = document.getElementById("sugerencias");
+
+        sugerenciasDiv.innerHTML = "";
+        sugerenciasDiv.style.display = "none";
+
+        const texto = (input.value || "").trim().toLowerCase();
+        const barrio = barrioSelect.value;
+        const tipologia = tipologiaSelect.value;
+
+        let resultados = organizaciones.slice();
+        if (barrio) resultados = resultados.filter(o => o.barrio === barrio);
+        if (tipologia) resultados = resultados.filter(o => o.tipologia === tipologia);
+        if (texto) resultados = resultados.filter(o => o.nombre.toLowerCase().includes(texto));
+
+        resultados = resultados.slice(0, 30);
+        if (!resultados.length) return;
+
+        resultados.forEach(org => {
+          const div = document.createElement("div");
+          div.textContent = org.nombre;
+          div.onclick = function() { seleccionarOrganizacion(org); };
+          sugerenciasDiv.appendChild(div);
+        });
+
+        sugerenciasDiv.style.display = "block";
+      }
+
+      function seleccionarOrganizacion(org) {
+        document.getElementById("organizacion").value = org.nombre || "";
+        document.getElementById("rut").value = org.rut || "";
+        document.getElementById("barrio").value = org.barrio || "";
+        document.getElementById("tipologia").value = org.tipologia || "";
+        document.getElementById("utAsignada").value = org.utAsignada || direccionEsperadaPorTipologia(org.tipologia) || "";
+        document.getElementById("concejaliaAsignada").value = org.concejaliaAsignada || "";
+
+        document.getElementById("barrio").disabled = true;
+        document.getElementById("tipologia").disabled = true;
+        document.getElementById("sugerencias").style.display = "none";
+        document.getElementById("sugerencias").innerHTML = "";
+
+        sugerirUnidadTecnicaPorTipologia();
+      }
+
+      function sugerirUnidadTecnicaPorTipologia() {
+        const tipologia = document.getElementById("tipologia").value;
+        const direccion = document.getElementById("direccion");
+        const sugerida = direccionEsperadaPorTipologia(tipologia);
+
+        if (sugerida && !direccion.value) {
+          direccion.value = sugerida;
+        }
+      }
+
+      function onTipologiaChange() {
+        filtrarOrganizaciones();
+        sugerirUnidadTecnicaPorTipologia();
+      }
+
+      function calcularPuntaje() {
+        const ids = ["problema", "objetivo", "propuesta", "fortalecimiento", "difusion", "programacion", "presupuesto", "aportes"];
+        let total = 0;
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          const val = parseFloat(el ? el.value : "");
+          if (!isNaN(val)) total += val;
+        });
+        document.getElementById("puntajeFinal").value = total ? total : "";
+      }
+
+      function obtenerDatosFormulario() {
+        return {
+          evaluador: document.getElementById("evaluador").value.trim(),
+          direccion: document.getElementById("direccion").value,
+          organizacion: document.getElementById("organizacion").value.trim(),
+          rut: document.getElementById("rut").value.trim(),
+          barrio: document.getElementById("barrio").value,
+          tipologia: document.getElementById("tipologia").value,
+          problema: document.getElementById("problema").value,
+          objetivo: document.getElementById("objetivo").value,
+          propuesta: document.getElementById("propuesta").value,
+          fortalecimiento: document.getElementById("fortalecimiento").value,
+          difusion: document.getElementById("difusion").value,
+          programacion: document.getElementById("programacion").value,
+          presupuesto: document.getElementById("presupuesto").value,
+          aportes: document.getElementById("aportes").value,
+          puntajeFinal: document.getElementById("puntajeFinal").value,
+          observaciones: document.getElementById("observaciones").value.trim(),
+          utAsignada: document.getElementById("utAsignada").value,
+          concejaliaAsignada: document.getElementById("concejaliaAsignada").value
+        };
+      }
+
+      function validarFormulario(datos) {
+        const obligatorios = [
+          ["evaluador", "Debes ingresar el nombre del evaluador/a."],
+          ["direccion", "Debes seleccionar la unidad técnica evaluadora."],
+          ["organizacion", "Debes seleccionar una organización."],
+          ["rut", "Debes seleccionar una organización válida para completar el RUT."],
+          ["barrio", "Debes seleccionar un barrio."],
+          ["tipologia", "Debes seleccionar una tipología."],
+          ["problema", "Debes evaluar Identificación del problema."],
+          ["objetivo", "Debes evaluar Definición de objetivo y propuesta solución."],
+          ["propuesta", "Debes evaluar Formulación propuesta solución."],
+          ["fortalecimiento", "Debes evaluar Fortalecimiento Comunitario."],
+          ["difusion", "Debes evaluar Difusión."],
+          ["programacion", "Debes evaluar Programación."],
+          ["presupuesto", "Debes evaluar Presupuesto."],
+          ["aportes", "Debes evaluar Aportes adicionales."],
+          ["puntajeFinal", "No se pudo calcular el puntaje final."]
+        ];
+
+        for (const [campo, mensaje] of obligatorios) {
+          if (!String(datos[campo] || "").trim()) {
+            mostrarError(mensaje);
+            return false;
+          }
+        }
+
+        const direccionEsperada = direccionEsperadaPorTipologia(datos.tipologia);
+        const direccionSeleccionada = (datos.direccion || "").trim().toUpperCase();
+        const esComision = direccionSeleccionada === "CE DIPRESEC";
+        const esConcejalia = direccionSeleccionada === "CONCEJALÍA" || direccionSeleccionada === "CONCEJALIA";
+
+        if (direccionEsperada && !esComision && !esConcejalia && direccionSeleccionada !== direccionEsperada) {
+          mostrarError(`La unidad técnica seleccionada no corresponde a la tipología del proyecto. Para "${datos.tipologia}" corresponde "${direccionEsperada}".`);
+          return false;
+        }
+
+        return true;
+      }
+
+      function enviarFormulario() {
+        if (enviando) return;
+        const datos = obtenerDatosFormulario();
+        if (!validarFormulario(datos)) return;
+
+        setEstadoEnvio(true);
+
+        google.script.run
+          .withSuccessHandler(function() {
+            setEstadoEnvio(false);
+            mostrarModal("modalExito");
+            limpiarFormulario();
+          })
+          .withFailureHandler(function(error) {
+            setEstadoEnvio(false);
+            mostrarError(error && error.message ? error.message : "Ocurrió un error al guardar la evaluación.");
+          })
+          .guardarEvaluacion(datos);
+      }
+
+      function setEstadoEnvio(enProceso) {
+        enviando = enProceso;
+        document.getElementById("btnEnviar").disabled = enProceso;
+        if (enProceso) mostrarModal("modalEnviando");
+        else cerrarModal("modalEnviando");
+      }
+
+      function limpiarFormulario() {
+        document.getElementById("formulario").reset();
+        document.getElementById("puntajeFinal").value = "";
+        document.getElementById("utAsignada").value = "";
+        document.getElementById("concejaliaAsignada").value = "";
+        document.getElementById("barrio").disabled = false;
+        document.getElementById("tipologia").disabled = false;
+        document.getElementById("sugerencias").style.display = "none";
+        document.getElementById("sugerencias").innerHTML = "";
+        cargarPreferenciasUsuario();
+      }
+
+      function mostrarAvisoPlazo() {
+        const aviso = document.getElementById("aviso-plazo");
+        const hoy = new Date();
+        const fechaLimite = new Date("2026-06-30");
+        hoy.setHours(0, 0, 0, 0);
+        fechaLimite.setHours(0, 0, 0, 0);
+        const diffDias = Math.floor((fechaLimite - hoy) / (1000 * 60 * 60 * 24));
+
+        if (diffDias < 0) {
+          aviso.textContent = "⚠️ El plazo para evaluar ha vencido. Plazo tope 30/06/2026.";
+          aviso.style.backgroundColor = "#ffcccc";
+          aviso.style.color = "#a10000";
+        } else if (diffDias <= 1) {
+          aviso.textContent = `⚠️ Queda ${diffDias === 0 ? "solo hoy" : "1 día"} para evaluar. Plazo tope 30/06/2026.`;
+          aviso.style.backgroundColor = "#ffd1d1";
+          aviso.style.color = "#a10000";
+        } else if (diffDias <= 10) {
+          aviso.textContent = `⏳ Quedan ${diffDias} días para evaluar. Plazo tope 30/06/2026.`;
+          aviso.style.backgroundColor = "#fff5cc";
+          aviso.style.color = "#b88d00";
+        } else {
+          aviso.textContent = `✅ Quedan ${diffDias} días para evaluar. Plazo tope 30/06/2026.`;
+          aviso.style.backgroundColor = "#d8f5d0";
+          aviso.style.color = "#0b7b3e";
+        }
+      }
+
+      function mostrarModal(id) { document.getElementById(id).style.display = "flex"; }
+      function cerrarModal(id) { document.getElementById(id).style.display = "none"; }
+      function mostrarError(mensaje) { document.getElementById("mensajeError").textContent = mensaje; mostrarModal("modalError"); }
+
+      function direccionEsperadaPorTipologia(tipologia) {
+        const mapa = {
+          "ALARMAS COMUNITARIAS": "UT ALARMAS",
+          "SISTEMA DE TELEPROTECCION": "UT CÁMARAS",
+          "SISTEMA DE TELEPROTECCIÓN": "UT CÁMARAS",
+          "SEGURIDAD VIAL": "TRÁNSITO",
+          "LUMINARIA SOLAR": "OPERACIONES",
+          "RECAMBIO DE LUMINARIA": "OPERACIONES",
+          "RECAMBIO DE LUMINARIA PÚBLICA": "OPERACIONES",
+          "RECAMBIO DE LUMINARIA PUBLICA": "OPERACIONES"
+        };
+        return mapa[(tipologia || "").trim().toUpperCase()] || "";
+      }
+
+      window.onload = function() {
+        cargarDatosIniciales();
+        cargarPreferenciasUsuario();
+        mostrarAvisoPlazo();
+      };
+
+      document.addEventListener("click", function(event) {
+        const sugerenciasDiv = document.getElementById("sugerencias");
+        const input = document.getElementById("organizacion");
+        if (!input.contains(event.target) && !sugerenciasDiv.contains(event.target)) {
+          sugerenciasDiv.style.display = "none";
+        }
+      });
+
+      document.getElementById("organizacion").addEventListener("input", function() {
+        if (!this.value.trim()) {
+          document.getElementById("rut").value = "";
+          document.getElementById("utAsignada").value = "";
+          document.getElementById("concejaliaAsignada").value = "";
+          document.getElementById("barrio").disabled = false;
+          document.getElementById("tipologia").disabled = false;
+        }
+      });
+
+      document.getElementById("organizacion").addEventListener("keydown", function(e) {
+        if (e.key === "Escape") document.getElementById("sugerencias").style.display = "none";
+      });
+
+      document.getElementById("organizacion").addEventListener("focus", function() { filtrarOrganizaciones(); });
+    </script>
+  </body>
+</html>
